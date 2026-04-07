@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -8,17 +9,20 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// ✅ ROOT ROUTE ADDED - This fixes "Cannot GET /"
+// Serve static files (frontend - index.html)
+app.use(express.static(path.join(__dirname, '..')));
+
+// Root route - serve index.html
 app.get('/', (req, res) => {
-    res.json({ 
-        message: 'SmartChat AI is running! 🚀',
-        endpoints: {
-            chat: 'POST /api/chat',
-            health: 'GET /api/health'
-        }
-    });
+    res.sendFile(path.join(__dirname, '..', 'index.html'));
 });
 
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'OK' });
+});
+
+// Chat API endpoint
 app.post('/api/chat', async (req, res) => {
     const { message } = req.body;
     
@@ -58,12 +62,9 @@ app.post('/api/chat', async (req, res) => {
 
         res.json({ reply: data.choices?.[0]?.message?.content });
     } catch (error) {
+        console.error('Chat error:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
-});
-
-app.get('/api/health', (req, res) => {
-    res.json({ status: 'OK' });
 });
 
 app.listen(PORT, () => {
