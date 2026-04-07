@@ -3,10 +3,21 @@ const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+
+// ✅ ROOT ROUTE ADDED - This fixes "Cannot GET /"
+app.get('/', (req, res) => {
+    res.json({ 
+        message: 'SmartChat AI is running! 🚀',
+        endpoints: {
+            chat: 'POST /api/chat',
+            health: 'GET /api/health'
+        }
+    });
+});
 
 app.post('/api/chat', async (req, res) => {
     const { message } = req.body;
@@ -56,5 +67,5 @@ app.get('/api/health', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`✅ Server running on http://localhost:${PORT}`);
+    console.log(`✅ Server running on port ${PORT}`);
 });
